@@ -1,23 +1,22 @@
-import { useEffect, useState } from "react";
-import axios from "axios";
-import Loader from "../UI/Loader";
-import ListItem from '../ListItems/ListItem';
+import { useEffect, useState } from "react"
+import ListItem from "../ListItems/ListItem";
+import axios from "axios"
+import Loader from "../UI/Loader"
 
-const Products = ({ onAddItem, onRemoveItem }) => {
+const Products = ({ onAddItem, onRemoveItem, eventState }) => {
     const [items, setItems] = useState([])
     const [loader, setLoader] = useState(true)
-    const [presentItems, setPresentItems] = useState([])
-    //new Add
 
     useEffect(() => {
         async function fetchItems() {
             try {
-                const response = await axios.get('https://ecommerce-2022-d40f1-default-rtdb.firebaseio.com/items.json');
-                const data = response.data;
-                const transformedData = data.map((item,index) => {
+                const response = await axios.get('https://ecommerce-2022-d40f1-default-rtdb.firebaseio.com/items.json')
+                const data = response.data
+                const transformedData = data.map((item, index) => {
                     return {
                         ...item,
-                        id : index
+                        quantity: 0,
+                        id: index
                     }
                 })
                 // setLoader(false)
@@ -36,21 +35,33 @@ const Products = ({ onAddItem, onRemoveItem }) => {
         fetchItems();
     }, [])
 
-    const handleAddItem = id => {
-        if(presentItems.indexOf(id) > -1) {
-            return;
+    useEffect(() => {
+        if(eventState.id > -1) {
+            if(eventState.type === 1) {
+                handleAddItem(eventState.id)
+            }
+            else if(eventState.type === -1) {
+                handleRemoveItem(eventState.id)
+            }
         }
-        setPresentItems([...presentItems, id])
-        onAddItem();
+    }, [eventState])
+
+    const handleAddItem = id => {
+        let data = [...items]
+        let index = data.findIndex(i => i.id === id)
+        data[index].quantity += 1
+
+        setItems([...data])
+        onAddItem(data[index]);
     }
 
     const handleRemoveItem = id => {
-        let index = presentItems.indexOf(id)
-        if(index > -1) {
-            let items = [...presentItems]
-            items.splice(index, 1)
-            setPresentItems([...items]);
-            onRemoveItem();
+        let data = [...items]
+        let index = data.findIndex(i => i.id === id)
+        if(data[index].quantity !== 0) {
+            data[index].quantity -= 1
+            setItems([...data])
+            onRemoveItem(data[index])
         }
     }
 
@@ -73,4 +84,4 @@ const Products = ({ onAddItem, onRemoveItem }) => {
     )
 }
 
-export default Products;
+export default Products
