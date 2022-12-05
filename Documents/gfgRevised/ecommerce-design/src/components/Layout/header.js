@@ -1,6 +1,18 @@
+import { useDispatch, useSelector } from "react-redux"
+import { useHistory } from "react-router-dom"
+import { logout } from "../../actions/auth"
 import Cart from "../Cart/Cart";
-import SearchBox from "../UI/Search";
-const Header = ({ count, items, onHandleEvent }) => {
+import SearchBox from "../UI/Search"
+
+const Header = () => {
+    const history = useHistory()
+    const authState = useSelector(state => state.auth)
+    const dispatch = useDispatch()
+
+    const logoutHandler = () => {
+        dispatch(logout())
+    }
+
     return (
         <header>
             <div className="nav-brand">
@@ -18,10 +30,19 @@ const Header = ({ count, items, onHandleEvent }) => {
                 </a>
             </div>
             <div className="searchBox-container">
-                <SearchBox />
+                <SearchBox/>
             </div>
+            { 
+                authState && authState.idToken ?
+                    <div className="user-actions">
+                        <button title="User Profile" className="material-icons">account_circle</button>
+                        <button onClick={logoutHandler} title="Logout" className="material-icons">logout</button>
+                    </div>
+                :
+                <button className="login-btn" onClick={() => history.push("/login")}>Login</button>
+            }
             <div className="cart-container">
-                <Cart count={count} items={items} onHandleEvent={onHandleEvent}/>
+                <Cart />
             </div>
         </header >
     )

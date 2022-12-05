@@ -1,31 +1,48 @@
 import { Fragment, useState } from "react"
-import Modal from "../UI/Modal";
-import CartItem from "./CartItem";
-import OrderSuccess from "../UI/OrderSuccess"
-import { useDispatch, useSelector } from "react-redux";
-import { addItemHandler, removeItemHandler, clearCartHandler } from "../../actions";
+import Modal from "../UI/Modal"
+import CartItem from "./CartItem"
+import OrderSuccessModal from "../UI/OrderSuccess"
+import { useDispatch, useSelector } from "react-redux"
+import { addItemHandler, clearCartHandler, placeOrderHandler, removeItemHandler } from "../../actions"
 
 const Cart = () => {
-    const [showModal, setShowModal] = useState(false);
-    const [orderModal, setOrderModal] = useState(false);
-    const items = useSelector(state => state.items);
-    const totalAmount = useSelector(state => state.totalAmount);
-    const dispatch = useDispatch();
+    const [showModal, setShowModal] = useState(false)
+    const [orderModal, setOrderModal] = useState(false)
+    const items = useSelector(state => state.cart.items)
+    const totalAmount = useSelector(state => state.cart.totalAmount)
+    const [orderId, setOrderId] = useState("")
+    const dispatch = useDispatch()
 
     const handleModal = () => {
         setShowModal(previousState => !previousState)
     }
+
     const handleOrderModal = () => {
-        dispatch( clearCartHandler())
         setShowModal(false);
-        setOrderModal(prev => !prev);
+        // dispatch(clearCartHandler())
+        setOrderModal(previous => !previous)
+    }
+
+    const orderHandler = () => {
+        // dispatch(clearCartHandler())
+        dispatch(placeOrderHandler(response => {
+            if(response.error) {
+                alert(response.data.error || "Some error occurred, please try again")
+            }
+            else {
+                console.log(response.data)
+                setOrderId(response.data.name)
+                setShowModal(false)
+                setOrderModal(previous => !previous)
+            }
+        }))
     }
 
     const dispatchEvents = (type, item) => {
-        if(type === 1){
+        if(type === 1) {
             dispatch(addItemHandler(item))
         }
-        else if(type === -1){
+        else if(type === -1) {
             dispatch(removeItemHandler(item.id))
         }
     }
@@ -56,7 +73,7 @@ const Cart = () => {
                                         <CartItem 
                                             data={item} 
                                             onEmitIncreaseItem={item => dispatchEvents(1, item)} 
-                                            onEmitDecreaseItem={item => dispatchEvents(-1, item)} 
+                                            onEmitDecreaseItem={item => dispatchEvents(-1, item)}
                                             key={item.id}
                                         />
                                     )
@@ -71,16 +88,17 @@ const Cart = () => {
                                 <div className="totalAmount">
                                     <h4>Total Amount: </h4>
                                     <h4>
-                                        {totalAmount}
+                                        { totalAmount }
+                                        <span style={{marginLeft: "4px"}}>INR</span>
                                     </h4>
                                 </div>
-                                <button onClick = {handleOrderModal}>Order Now</button>
+                                <button onClick={orderHandler}>Order Now</button>
                             </div>
                         }
                     </div>
                 </Modal>
             }
-            {orderModal && <OrderSuccess onClose={handleOrderModal} />}
+            { orderModal && <OrderSuccessModal orderId={orderId} onClose={handleOrderModal}/> }
         </Fragment>
     )
 }

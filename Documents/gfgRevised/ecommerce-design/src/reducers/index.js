@@ -1,61 +1,68 @@
-const mainReducer = (state,action) => {
-    const {type, payload} = action;
-    switch(type){
-        case "ADD_ITEM" : {
-            let items = [...state.items];
+import { combineReducers } from "redux"
+import authReducer from "./auth"
+
+const mainReducer = (state = {
+    items: [],
+    totalAmount: 0
+}, action) => {
+    const { type, payload } = action
+    switch(type) {
+        case 'ADD_ITEM': {
+            let items = [...state.items]
             let index = items.findIndex(item => item.id === payload.item.id)
-            if(index > -1){
+            if(index > -1) {
                 items[index] = {
                     ...items[index],
-                    quantity : items[index].quantity + 1
+                    quantity: items[index].quantity + 1
                 }
             }
-            else{
+            else {
                 items.push({
                     ...payload.item,
-                    quantity : 1
+                    quantity: 1
                 })
             }
 
-            const totalAmount = state.totalAmount  + payload.item.discountedPrice;
+            const totalAmount = state.totalAmount + payload.item.discountedPrice
+
             return {
                 ...state,
-                items:items,
-                totalAmount
+                items: items,
+                totalAmount: totalAmount
             }
         }
-        case "REMOVE_ITEM" : {
-            let items = [...state.items];
-            let index = items.findIndex(item => item.id === payload.id);
-            let totalAmount = state.totalAmount - items[index].discountedPrice;
-
-            if(items[index].quantity === 1){
-                items.splice(index,1)
+        case 'REMOVE_ITEM': {
+            let items = [...state.items]
+            let index = items.findIndex(item => item.id === payload.id)
+            let totalAmount = state.totalAmount - items[index].discountedPrice
+            
+            if(items[index].quantity === 1) {
+                items.splice(index, 1)
             }
-            else{
+            else {
                 items[index] = {
                     ...items[index],
-                    quantity : items[index].quantity - 1
+                    quantity: items[index].quantity - 1
                 }
             }
+
             return {
                 ...state,
-                items:items,
-                totalAmount
+                items: items,
+                totalAmount: totalAmount
             }
-            
         }
-        case "CLEAR_CART" : {
+        case 'CLEAR_CART': {
             return {
-                items : [],
-                totalAmount : 0
+                items: [],
+                totalAmount: 0
             }
         }
-        default : return state;
+        default: return state;
     }
 }
 
-
-export default mainReducer;
-// Added the comment to Add the code to GitHub
-// Add the another Comment
+export default combineReducers({
+    cart: mainReducer,
+    auth: authReducer
+})

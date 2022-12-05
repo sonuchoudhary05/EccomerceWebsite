@@ -1,25 +1,23 @@
 import { Fragment, useState } from "react"
-import { useSelector, useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux"
 import AddToCartIcon from "../../assets/icons/add_cart.svg";
 import Modal from "../UI/Modal";
-import { addItemHandler, removeItemHandler } from "../../actions";
+import { addItemHandler, removeItemHandler } from "../../actions/index";
 
-const ListItem = ({ data}) => {
+const ListItem = ({ data }) => {
     // const [counter, setCounter] = useState(0)
     const [showModal, setShowModal] = useState(false)
-    const item = useSelector(state => state.items.find(item => item.id === data.id));
+    const item = useSelector(state => state.cart.items.find(item => item.id === data.id))
     const dispatch = useDispatch()
 
     const increaseCounterByOne = event => {
         event.stopPropagation()
         dispatch(addItemHandler(data))
-        
     }
 
     const decreaseCounterByOne = event => {
         event.stopPropagation()
         dispatch(removeItemHandler(data.id))
-        
     }
 
     const handleModal = () => {
